@@ -12,13 +12,8 @@ public class Offer {
     }
 
     public boolean productQualifiesFor(ProductQuantity pq) {
-        return pq.getProduct().equals(getProduct())
-                && SingleProductSpecialOffer.getInstance(offerType).enoughQuantityOf(pq);
+        return pq.getProduct().equals(product)
+                && SingleProductSpecialOffer.getInstance(offerType, argument).enoughQuantityOf(pq);
     }
-
-    Product getProduct() {
-        return this.product;
-    }
-
 
 }

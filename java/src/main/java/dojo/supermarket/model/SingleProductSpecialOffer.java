@@ -2,17 +2,19 @@ package dojo.supermarket.model;
 
 public interface SingleProductSpecialOffer {
 
-    static SingleProductSpecialOffer getInstance(SpecialOfferType specialOfferType) {
+    static SingleProductSpecialOffer getInstance(SpecialOfferType specialOfferType, double argument) {
         switch (specialOfferType) {
-            case ThreeForTwo: return new ThreeForTwoOffer();
-            case TwoForAmount: return new TwoForAmountOffer();
-            case TenPercentDiscount: return new TenPercentDiscountOffer();
-            case FiveForAmount: return new FiveForAmountOffer();
+            case ThreeForTwo: return new ExtraForFreeOffer(2);
+            case TwoForAmount:
+                return new QuantityDiscountOffer(2, argument);
+            case FiveForAmount:
+                return new QuantityDiscountOffer(5, argument);
+            case TenPercentDiscount: return new PercentageDiscountOffer(argument);
             default: return null;
         }
     }
 
-    Discount calculateDiscount(ProductQuantity productQuantity, Offer offer, double unitPrice);
+    Discount calculateDiscount(ProductQuantity productQuantity, double unitPrice);
 
     boolean enoughQuantityOf(ProductQuantity productQuantity);
 
