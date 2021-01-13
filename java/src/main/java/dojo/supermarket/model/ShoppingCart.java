@@ -38,32 +38,30 @@ public class ShoppingCart {
             double quantity = productQuantities.get(p);
             if (offers.containsKey(p)) {
                 Offer offer = offers.get(p);
+                if (!meetsOffer(p, quantity, offer))
+                    continue;;
                 double unitPrice = catalog.getUnitPrice(p);
                 int quantityAsInt = (int) quantity;
                 Discount discount = null;
                 int minQuantityForDiscount = getMinQuantityForDiscount(offer.offerType);
                 int discountGroupUnitCount = getDiscountGroupUnitCount(offer.offerType);
+                int discountGroupCount = quantityAsInt / discountGroupUnitCount;
 
                 if (offer.offerType == SpecialOfferType.TwoForAmount) {
-                    if (quantityAsInt >= minQuantityForDiscount) {
-                        int discountGroupCount = quantityAsInt / discountGroupUnitCount;
-                        double priceOfDiscountedItems = offer.argument * discountGroupCount;
-                        double priceOfNonDiscountedItems = (quantityAsInt % 2) * unitPrice;
-                        double totalPrice = priceOfDiscountedItems + priceOfNonDiscountedItems;
-                        double discountedPrice = unitPrice * quantity - totalPrice;
-                        discount = new Discount(p, "2 for " + offer.argument, -discountedPrice);
-                    }
-
+                    double priceOfDiscountedItems = offer.argument * discountGroupCount;
+                    double priceOfNonDiscountedItems = (quantityAsInt % 2) * unitPrice;
+                    double totalPrice = priceOfDiscountedItems + priceOfNonDiscountedItems;
+                    double discountedPrice = unitPrice * quantity - totalPrice;
+                    discount = new Discount(p, "2 for " + offer.argument, -discountedPrice);
                 }
-                int discountGroupCount = quantityAsInt / discountGroupUnitCount;
-                if (offer.offerType == SpecialOfferType.ThreeForTwo && quantityAsInt > minQuantityForDiscount) {
+                if (offer.offerType == SpecialOfferType.ThreeForTwo) {
                     double discountAmount = quantity * unitPrice - ((discountGroupCount * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
                     discount = new Discount(p, "3 for 2", -discountAmount);
                 }
                 if (offer.offerType == SpecialOfferType.TenPercentDiscount) {
                     discount = new Discount(p, offer.argument + "% off", -quantity * unitPrice * offer.argument / 100.0);
                 }
-                if (offer.offerType == SpecialOfferType.FiveForAmount && quantityAsInt >= minQuantityForDiscount) {
+                if (offer.offerType == SpecialOfferType.FiveForAmount) {
                     double discountTotal = unitPrice * quantity - (offer.argument * discountGroupCount + quantityAsInt % 5 * unitPrice);
                     discount = new Discount(p, minQuantityForDiscount + " for " + offer.argument, -discountTotal);
                 }
@@ -75,6 +73,9 @@ public class ShoppingCart {
     }
 
 
+    private boolean meetsOffer(Product p, double quantity, Offer offer) {
+        return p.equals(offer.getProduct()) && quantity >= getMinQuantityForDiscount(offer.offerType);
+    }
 
     private int getDiscountGroupUnitCount(SpecialOfferType offerType) {
         switch (offerType) {
