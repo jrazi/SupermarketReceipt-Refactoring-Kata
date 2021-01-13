@@ -41,35 +41,56 @@ public class ShoppingCart {
                 if (!meetsOffer(p, quantity, offer))
                     continue;;
                 double unitPrice = catalog.getUnitPrice(p);
-                int quantityAsInt = (int) quantity;
                 Discount discount = null;
-                int minQuantityForDiscount = getMinQuantityForDiscount(offer.offerType);
-                int discountGroupUnitCount = getDiscountGroupUnitCount(offer.offerType);
-                int discountGroupCount = quantityAsInt / discountGroupUnitCount;
 
                 if (offer.offerType == SpecialOfferType.TwoForAmount) {
-                    double priceOfDiscountedItems = offer.argument * discountGroupCount;
-                    double priceOfNonDiscountedItems = (quantityAsInt % 2) * unitPrice;
-                    double totalPrice = priceOfDiscountedItems + priceOfNonDiscountedItems;
-                    double discountedPrice = unitPrice * quantity - totalPrice;
-                    discount = new Discount(p, "2 for " + offer.argument, -discountedPrice);
+                    discount = getDiscountForTwoForAmount(p, quantity, offer, unitPrice);
                 }
                 if (offer.offerType == SpecialOfferType.ThreeForTwo) {
-                    double discountAmount = quantity * unitPrice - ((discountGroupCount * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
-                    discount = new Discount(p, "3 for 2", -discountAmount);
+                    discount = getDiscountForThreeForTwo(p, quantity, unitPrice);
                 }
                 if (offer.offerType == SpecialOfferType.TenPercentDiscount) {
-                    discount = new Discount(p, offer.argument + "% off", -quantity * unitPrice * offer.argument / 100.0);
+                    discount = getDiscountForTenPercentDiscount(p, quantity, offer, unitPrice);
                 }
                 if (offer.offerType == SpecialOfferType.FiveForAmount) {
-                    double discountTotal = unitPrice * quantity - (offer.argument * discountGroupCount + quantityAsInt % 5 * unitPrice);
-                    discount = new Discount(p, minQuantityForDiscount + " for " + offer.argument, -discountTotal);
+                    discount = getDiscountForFiveForAmount(p, quantity, offer, unitPrice);
                 }
                 if (discount != null)
                     receipt.addDiscount(discount);
             }
 
         }
+    }
+
+    private Discount getDiscountForFiveForAmount(Product p, double quantity, Offer offer, double unitPrice) {
+        int quantityAsInt = (int) quantity;
+        int discountGroupCount = quantityAsInt/5;
+
+        double discountTotal = unitPrice * quantity - (offer.argument * discountGroupCount + quantityAsInt % 5 * unitPrice);
+        return new Discount(p,  5 + " for " + offer.argument, -discountTotal);
+    }
+
+    private Discount getDiscountForTenPercentDiscount(Product p, double quantity, Offer offer, double unitPrice) {
+        return new Discount(p, offer.argument + "% off", -quantity * unitPrice * offer.argument / 100.0);
+    }
+
+    private Discount getDiscountForThreeForTwo(Product p, double quantity, double unitPrice) {
+        int quantityAsInt = (int) quantity;
+        int discountGroupCount = quantityAsInt/3;
+
+        double discountAmount = quantity * unitPrice - ((discountGroupCount * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
+        return new Discount(p, "3 for 2", -discountAmount);
+    }
+
+    private Discount getDiscountForTwoForAmount(Product p, double quantity, Offer offer, double unitPrice) {
+        int quantityAsInt = (int) quantity;
+        int discountGroupCount = quantityAsInt/2;
+
+        double priceOfDiscountedItems = offer.argument * discountGroupCount;
+        double priceOfNonDiscountedItems = (quantityAsInt % 2) * unitPrice;
+        double totalPrice = priceOfDiscountedItems + priceOfNonDiscountedItems;
+        double discountedPrice = unitPrice * quantity - totalPrice;
+        return new Discount(p, "2 for " + offer.argument, -discountedPrice);
     }
 
 
