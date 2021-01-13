@@ -36,6 +36,7 @@ public class ShoppingCart {
     void handleOffers(Receipt receipt, Map<Product, Offer> offers, SupermarketCatalog catalog) {
         for (Product p: productQuantities().keySet()) {
             double quantity = productQuantities.get(p);
+            ProductQuantity pq = new ProductQuantity(p, quantity);
             if (offers.containsKey(p)) {
                 Offer offer = offers.get(p);
                 if (!meetsOffer(p, quantity, offer))
@@ -44,16 +45,16 @@ public class ShoppingCart {
                 Discount discount = null;
 
                 if (offer.offerType == SpecialOfferType.TwoForAmount) {
-                    discount = getDiscountForTwoForAmount(p, quantity, offer, unitPrice);
+                    discount = getDiscountForTwoForAmount(pq, offer, unitPrice);
                 }
                 if (offer.offerType == SpecialOfferType.ThreeForTwo) {
-                    discount = getDiscountForThreeForTwo(p, quantity, unitPrice);
+                    discount = getDiscountForThreeForTwo(pq, unitPrice);
                 }
                 if (offer.offerType == SpecialOfferType.TenPercentDiscount) {
-                    discount = getDiscountForTenPercentDiscount(p, quantity, offer, unitPrice);
+                    discount = getDiscountForTenPercentDiscount(pq, offer, unitPrice);
                 }
                 if (offer.offerType == SpecialOfferType.FiveForAmount) {
-                    discount = getDiscountForFiveForAmount(p, quantity, offer, unitPrice);
+                    discount = getDiscountForFiveForAmount(pq, offer, unitPrice);
                 }
                 if (discount != null)
                     receipt.addDiscount(discount);
@@ -62,35 +63,39 @@ public class ShoppingCart {
         }
     }
 
-    private Discount getDiscountForFiveForAmount(Product p, double quantity, Offer offer, double unitPrice) {
-        int quantityAsInt = (int) quantity;
+    private Discount getDiscountForFiveForAmount(ProductQuantity productQuantity, Offer offer, double unitPrice) {
+        int quantityAsInt = (int) productQuantity.getQuantity();
         int discountGroupCount = quantityAsInt/5;
 
-        double discountTotal = unitPrice * quantity - (offer.argument * discountGroupCount + quantityAsInt % 5 * unitPrice);
-        return new Discount(p,  5 + " for " + offer.argument, -discountTotal);
+        double discountTotal = unitPrice * productQuantity.getQuantity() - (offer.argument * discountGroupCount + quantityAsInt % 5 * unitPrice);
+        return new Discount(productQuantity.getProduct(),  5 + " for " + offer.argument, -discountTotal);
     }
 
-    private Discount getDiscountForTenPercentDiscount(Product p, double quantity, Offer offer, double unitPrice) {
-        return new Discount(p, offer.argument + "% off", -quantity * unitPrice * offer.argument / 100.0);
+    private Discount getDiscountForTenPercentDiscount(ProductQuantity productQuantity, Offer offer, double unitPrice) {
+        return new Discount(
+                productQuantity.getProduct(),
+                offer.argument + "% off",
+                -productQuantity.getQuantity() * unitPrice * offer.argument / 100.0
+        );
     }
 
-    private Discount getDiscountForThreeForTwo(Product p, double quantity, double unitPrice) {
-        int quantityAsInt = (int) quantity;
+    private Discount getDiscountForThreeForTwo(ProductQuantity productQuantity, double unitPrice) {
+        int quantityAsInt = (int) productQuantity.getQuantity();
         int discountGroupCount = quantityAsInt/3;
 
-        double discountAmount = quantity * unitPrice - ((discountGroupCount * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
-        return new Discount(p, "3 for 2", -discountAmount);
+        double discountAmount = productQuantity.getQuantity() * unitPrice - ((discountGroupCount * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
+        return new Discount(productQuantity.getProduct(), "3 for 2", -discountAmount);
     }
 
-    private Discount getDiscountForTwoForAmount(Product p, double quantity, Offer offer, double unitPrice) {
-        int quantityAsInt = (int) quantity;
+    private Discount getDiscountForTwoForAmount(ProductQuantity productQuantity, Offer offer, double unitPrice) {
+        int quantityAsInt = (int) productQuantity.getQuantity();
         int discountGroupCount = quantityAsInt/2;
 
         double priceOfDiscountedItems = offer.argument * discountGroupCount;
         double priceOfNonDiscountedItems = (quantityAsInt % 2) * unitPrice;
         double totalPrice = priceOfDiscountedItems + priceOfNonDiscountedItems;
-        double discountedPrice = unitPrice * quantity - totalPrice;
-        return new Discount(p, "2 for " + offer.argument, -discountedPrice);
+        double discountedPrice = unitPrice *  productQuantity.getQuantity() - totalPrice;
+        return new Discount(productQuantity.getProduct(), "2 for " + offer.argument, -discountedPrice);
     }
 
 
@@ -98,12 +103,6 @@ public class ShoppingCart {
         return p.equals(offer.getProduct()) && quantity >= getMinQuantityForDiscount(offer.offerType);
     }
 
-    private int getDiscountGroupUnitCount(SpecialOfferType offerType) {
-        switch (offerType) {
-            case ThreeForTwo: return 3;
-            default: return getMinQuantityForDiscount(offerType);
-        }
-    }
 
     private int getMinQuantityForDiscount(SpecialOfferType offerType) {
         switch (offerType) {
