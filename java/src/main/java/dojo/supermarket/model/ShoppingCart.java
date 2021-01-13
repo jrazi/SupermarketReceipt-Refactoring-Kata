@@ -39,7 +39,7 @@ public class ShoppingCart {
             ProductQuantity pq = new ProductQuantity(p, quantity);
             if (offers.containsKey(p)) {
                 Offer offer = offers.get(p);
-                if (!meetsOffer(p, quantity, offer))
+                if (!offer.productQualifiesFor(pq))
                     continue;;
                 double unitPrice = catalog.getUnitPrice(p);
                 Discount discount = null;
@@ -64,23 +64,4 @@ public class ShoppingCart {
 
         }
     }
-
-
-    private boolean meetsOffer(Product p, double quantity, Offer offer) {
-        return p.equals(offer.getProduct()) && quantity >= getMinQuantityForDiscount(offer.offerType);
-    }
-
-
-    private int getMinQuantityForDiscount(SpecialOfferType offerType) {
-        switch (offerType) {
-            case TwoForAmount:
-            case ThreeForTwo:
-                return 2;
-            case FiveForAmount:
-                return 5;
-            default:
-                return 1;
-        }
-    }
-
 }

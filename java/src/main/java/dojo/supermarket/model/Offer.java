@@ -11,8 +11,25 @@ public class Offer {
         this.product = product;
     }
 
+    public boolean productQualifiesFor(ProductQuantity pq) {
+        return pq.getProduct().equals(getProduct())
+                && pq.getQuantity() >= getMinQuantityForDiscount(offerType);
+    }
+
     Product getProduct() {
         return this.product;
+    }
+
+    private int getMinQuantityForDiscount(SpecialOfferType offerType) {
+        switch (offerType) {
+            case TwoForAmount:
+            case ThreeForTwo:
+                return 2;
+            case FiveForAmount:
+                return 5;
+            default:
+                return 1;
+        }
     }
 
 }
