@@ -59,11 +59,8 @@ public class ShoppingCart {
                 if (!offer.productQualifiesFor(pq))
                     continue;;
                 double unitPrice = catalog.getUnitPrice(p);
-                SingleProductSpecialOffer specialOffer = SingleProductSpecialOffer.getInstance(offer.offerType, offer.argument);
-                if (specialOffer != null) {
-                    Discount discount = specialOffer.calculateDiscount(pq, unitPrice);
-                    discountList.add(discount);
-                }
+                Discount discount = offer.calculateDiscount(pq, unitPrice);
+                discountList.add(discount);
             }
         }
         return discountList;
