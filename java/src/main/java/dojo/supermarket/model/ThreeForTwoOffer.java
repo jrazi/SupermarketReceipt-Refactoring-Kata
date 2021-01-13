@@ -10,4 +10,9 @@ public class ThreeForTwoOffer implements SingleProductSpecialOffer {
         double discountAmount = productQuantity.getQuantity() * unitPrice - ((discountGroupCount * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
         return new Discount(productQuantity.getProduct(), "3 for 2", -discountAmount);
     }
+
+    @Override
+    public boolean enoughQuantityOf(ProductQuantity productQuantity) {
+        return productQuantity.getQuantity() >= 2.0;
+    }
 }

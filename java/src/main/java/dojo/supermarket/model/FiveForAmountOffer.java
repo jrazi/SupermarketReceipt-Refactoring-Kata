@@ -9,4 +9,9 @@ public class FiveForAmountOffer implements SingleProductSpecialOffer {
         double discountTotal = unitPrice * productQuantity.getQuantity() - (offer.argument * discountGroupCount + quantityAsInt % 5 * unitPrice);
         return new Discount(productQuantity.getProduct(),  5 + " for " + offer.argument, -discountTotal);
     }
+
+    @Override
+    public boolean enoughQuantityOf(ProductQuantity productQuantity) {
+        return productQuantity.getQuantity() >= 5.0;
+    }
 }

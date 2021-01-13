@@ -10,4 +10,9 @@ public class TenPercentDiscountOffer implements SingleProductSpecialOffer {
                 -productQuantity.getQuantity() * unitPrice * offer.argument / 100.0
         );
     }
+
+    @Override
+    public boolean enoughQuantityOf(ProductQuantity productQuantity) {
+        return productQuantity.getQuantity() >= 0.0;
+    }
 }

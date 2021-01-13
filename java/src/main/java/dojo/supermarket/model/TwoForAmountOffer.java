@@ -13,4 +13,9 @@ public class TwoForAmountOffer implements SingleProductSpecialOffer {
         double discountedPrice = unitPrice *  productQuantity.getQuantity() - totalPrice;
         return new Discount(productQuantity.getProduct(), "2 for " + offer.argument, -discountedPrice);
     }
+
+    @Override
+    public boolean enoughQuantityOf(ProductQuantity productQuantity) {
+        return productQuantity.getQuantity() >= 2.0;
+    }
 }

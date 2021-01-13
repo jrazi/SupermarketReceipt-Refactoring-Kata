@@ -42,22 +42,9 @@ public class ShoppingCart {
                 if (!offer.productQualifiesFor(pq))
                     continue;;
                 double unitPrice = catalog.getUnitPrice(p);
-                Discount discount = null;
-                SingleProductSpecialOffer specialOffer = null;
-                if (offer.offerType == SpecialOfferType.TwoForAmount) {
-                    specialOffer = new TwoForAmountOffer();
-                }
-                if (offer.offerType == SpecialOfferType.ThreeForTwo) {
-                    specialOffer = new ThreeForTwoOffer();
-                }
-                if (offer.offerType == SpecialOfferType.TenPercentDiscount) {
-                    specialOffer = new TenPercentDiscountOffer();
-                }
-                if (offer.offerType == SpecialOfferType.FiveForAmount) {
-                    specialOffer = new FiveForAmountOffer();
-                }
+                SingleProductSpecialOffer specialOffer = SingleProductSpecialOffer.getInstance(offer.offerType);
                 if (specialOffer != null) {
-                    discount = specialOffer.calculateDiscount(pq, offer, unitPrice);
+                    Discount discount = specialOffer.calculateDiscount(pq, offer, unitPrice);
                     receipt.addDiscount(discount);
                 }
             }
