@@ -33,6 +33,19 @@ public class ShoppingCart {
         }
     }
 
+    Receipt createReceipt(SupermarketCatalog catalog, Map<Product, Offer> offers) {
+        Receipt receipt = new Receipt();
+        for (ProductQuantity pq: items) {
+            Product p = pq.getProduct();
+            double quantity = pq.getQuantity();
+            double unitPrice = catalog.getUnitPrice(p);
+            double price = quantity * unitPrice;
+            receipt.addProduct(p, quantity, unitPrice, price);
+        }
+        handleOffers(receipt, offers, catalog);
+        return receipt;
+    }
+
     void handleOffers(Receipt receipt, Map<Product, Offer> offers, SupermarketCatalog catalog) {
         for (Product p: productQuantities().keySet()) {
             double quantity = productQuantities.get(p);
@@ -48,7 +61,6 @@ public class ShoppingCart {
                     receipt.addDiscount(discount);
                 }
             }
-
         }
     }
 }
