@@ -8,6 +8,7 @@ public class Teller {
 
     private final SupermarketCatalog catalog;
     private Map<Product, Offer> offers = new HashMap<>();
+    private Map<Product, Double> bundleOffers = new HashMap<>();
 
     public Teller(SupermarketCatalog catalog) {
         this.catalog = catalog;
@@ -17,8 +18,12 @@ public class Teller {
         this.offers.put(product, new Offer(offerType, product, argument));
     }
 
+    public void addBundleOffer(Map<Product, Double> bundle){
+        this.bundleOffers = bundle;
+    }
+
     public Receipt checksOutArticlesFrom(ShoppingCart theCart) {
-        return theCart.createReceipt(this.catalog, this.offers);
+        return theCart.createReceipt(this.catalog, this.offers, this.bundleOffers);
     }
 
 }

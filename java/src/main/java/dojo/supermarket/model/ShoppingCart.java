@@ -33,7 +33,7 @@ public class ShoppingCart {
         }
     }
 
-    Receipt createReceipt(SupermarketCatalog catalog, Map<Product, Offer> offers) {
+    Receipt createReceipt(SupermarketCatalog catalog, Map<Product, Offer> offers, Map<Product, Double> bundleOffers) {
         Receipt receipt = new Receipt();
         for (ProductQuantity pq: items) {
             Product p = pq.getProduct();
@@ -42,15 +42,28 @@ public class ShoppingCart {
             double price = quantity * unitPrice;
             receipt.addProduct(p, quantity, unitPrice, price);
         }
-        List<Discount> discountList = getDiscountListForOffers(offers, catalog);
+        List<Discount> discountList = getDiscountListForOffers(offers, bundleOffers, catalog);
         discountList
                 .stream()
                 .forEach(discount -> receipt.addDiscount(discount));
         return receipt;
     }
 
-    private List<Discount> getDiscountListForOffers(Map<Product, Offer> offers, SupermarketCatalog catalog) {
+    private List<Discount> getDiscountListForOffers(Map<Product, Offer> offers, Map<Product, Double> bundleOffers, SupermarketCatalog catalog) {
         List<Discount> discountList = new ArrayList<>();
+        boolean bundleDiscount = false;
+        List<Discount> tempBundleDiscounts = new ArrayList<>();
+        for (Product p: bundleOffers.keySet()){
+            bundleDiscount = false;
+            if (!(productQuantities.containsKey(p) && productQuantities.get(p) >= bundleOffers.get(p))){
+                break;
+            }
+            tempBundleDiscounts.add(new Discount(p, "bundle discount", Constants.bundleDiscountPercent * bundleOffers.get(p) * catalog.getUnitPrice(p)));
+            bundleDiscount = true;
+        }
+        if (bundleDiscount){
+            discountList = tempBundleDiscounts;
+        }
         for (Product p: productQuantities().keySet()) {
             double quantity = productQuantities.get(p);
             ProductQuantity pq = new ProductQuantity(p, quantity);
