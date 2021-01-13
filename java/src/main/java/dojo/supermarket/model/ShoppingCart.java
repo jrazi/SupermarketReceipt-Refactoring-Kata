@@ -42,11 +42,15 @@ public class ShoppingCart {
             double price = quantity * unitPrice;
             receipt.addProduct(p, quantity, unitPrice, price);
         }
-        handleOffers(receipt, offers, catalog);
+        List<Discount> discountList = getDiscountListForOffers(offers, catalog);
+        discountList
+                .stream()
+                .forEach(discount -> receipt.addDiscount(discount));
         return receipt;
     }
 
-    void handleOffers(Receipt receipt, Map<Product, Offer> offers, SupermarketCatalog catalog) {
+    List<Discount> getDiscountListForOffers(Map<Product, Offer> offers, SupermarketCatalog catalog) {
+        List<Discount> discountList = new ArrayList<>();
         for (Product p: productQuantities().keySet()) {
             double quantity = productQuantities.get(p);
             ProductQuantity pq = new ProductQuantity(p, quantity);
@@ -58,9 +62,10 @@ public class ShoppingCart {
                 SingleProductSpecialOffer specialOffer = SingleProductSpecialOffer.getInstance(offer.offerType);
                 if (specialOffer != null) {
                     Discount discount = specialOffer.calculateDiscount(pq, offer, unitPrice);
-                    receipt.addDiscount(discount);
+                    discountList.add(discount);
                 }
             }
         }
+        return discountList;
     }
 }
