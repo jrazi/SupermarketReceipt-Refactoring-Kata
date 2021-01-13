@@ -43,59 +43,26 @@ public class ShoppingCart {
                     continue;;
                 double unitPrice = catalog.getUnitPrice(p);
                 Discount discount = null;
-
+                SingleProductSpecialOffer specialOffer = null;
                 if (offer.offerType == SpecialOfferType.TwoForAmount) {
-                    discount = getDiscountForTwoForAmount(pq, offer, unitPrice);
+                    specialOffer = new TwoForAmountOffer();
                 }
                 if (offer.offerType == SpecialOfferType.ThreeForTwo) {
-                    discount = getDiscountForThreeForTwo(pq, unitPrice);
+                    specialOffer = new ThreeForTwoOffer();
                 }
                 if (offer.offerType == SpecialOfferType.TenPercentDiscount) {
-                    discount = getDiscountForTenPercentDiscount(pq, offer, unitPrice);
+                    specialOffer = new TenPercentDiscountOffer();
                 }
                 if (offer.offerType == SpecialOfferType.FiveForAmount) {
-                    discount = getDiscountForFiveForAmount(pq, offer, unitPrice);
+                    specialOffer = new FiveForAmountOffer();
                 }
-                if (discount != null)
+                if (specialOffer != null) {
+                    discount = specialOffer.calculateDiscount(pq, offer, unitPrice);
                     receipt.addDiscount(discount);
+                }
             }
 
         }
-    }
-
-    private Discount getDiscountForFiveForAmount(ProductQuantity productQuantity, Offer offer, double unitPrice) {
-        int quantityAsInt = (int) productQuantity.getQuantity();
-        int discountGroupCount = quantityAsInt/5;
-
-        double discountTotal = unitPrice * productQuantity.getQuantity() - (offer.argument * discountGroupCount + quantityAsInt % 5 * unitPrice);
-        return new Discount(productQuantity.getProduct(),  5 + " for " + offer.argument, -discountTotal);
-    }
-
-    private Discount getDiscountForTenPercentDiscount(ProductQuantity productQuantity, Offer offer, double unitPrice) {
-        return new Discount(
-                productQuantity.getProduct(),
-                offer.argument + "% off",
-                -productQuantity.getQuantity() * unitPrice * offer.argument / 100.0
-        );
-    }
-
-    private Discount getDiscountForThreeForTwo(ProductQuantity productQuantity, double unitPrice) {
-        int quantityAsInt = (int) productQuantity.getQuantity();
-        int discountGroupCount = quantityAsInt/3;
-
-        double discountAmount = productQuantity.getQuantity() * unitPrice - ((discountGroupCount * 2 * unitPrice) + quantityAsInt % 3 * unitPrice);
-        return new Discount(productQuantity.getProduct(), "3 for 2", -discountAmount);
-    }
-
-    private Discount getDiscountForTwoForAmount(ProductQuantity productQuantity, Offer offer, double unitPrice) {
-        int quantityAsInt = (int) productQuantity.getQuantity();
-        int discountGroupCount = quantityAsInt/2;
-
-        double priceOfDiscountedItems = offer.argument * discountGroupCount;
-        double priceOfNonDiscountedItems = (quantityAsInt % 2) * unitPrice;
-        double totalPrice = priceOfDiscountedItems + priceOfNonDiscountedItems;
-        double discountedPrice = unitPrice *  productQuantity.getQuantity() - totalPrice;
-        return new Discount(productQuantity.getProduct(), "2 for " + offer.argument, -discountedPrice);
     }
 
 
